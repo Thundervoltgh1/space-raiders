@@ -5,15 +5,19 @@ screen= pygame.display.set_mode((WIDTH,HEIGHT))
 image=pygame.image.load("ship1.png")
 maxbullet=3
 vel=5
+redhit=pygame.USEREVENT+1
+yellowhit=pygame.USEREVENT+2
 sw,sh=55,40
 imag=pygame.image.load("ship2.png")
 image1=pygame.transform.scale(image,(sw,sh))
 images=pygame.transform.scale(imag,(sw,sh))
 one=pygame.transform.rotate(image1,90)
 two=pygame.transform.rotate(images,270)
+bullet_vel=7
 pygame.display.set_caption("SPACE RAIDERS")
 screen.fill("white")
 health=pygame.font.SysFont("Comicsans",20)
+winner=pygame.font.SysFont("Comicsans",100)
 pygame.display.update()
 spaceimg=pygame.image.load("bg.png")
 space=pygame.transform.scale(spaceimg,(WIDTH,HEIGHT))
@@ -53,11 +57,28 @@ def main():
                 if event.key==pygame.K_RSHIFT and len(redbullets)<maxbullet:
                     bullet=pygame.Rect(red.x,red.y+red.height//2,10,5)
                     redbullets.append(bullet)
+            if event.type==redhit:
+                redhealth-=1
+            if event.type==yellowhit:
+                yellowhealth-=1
+        winner_text=""
+        if redhealth<=0:
+            winner_text="YELLOW WINS"
+        if yellowhealth<=0:
+            winner_text="RED WINS"
+        if winner_text!="":
+            draw_winner(winner_text)
+            break
         keys_pressed=pygame.key.get_pressed()
         ylwmove(keys_pressed,yellow)
         redmove(keys_pressed,red)
         draw(red,yellow,redhealth,yellowhealth,yellowbullets,redbullets)
+        handlebullets(yellowbullets,red,redbullets,yellow)
 
+def draw_winner(text):
+    text1=winner.render(text,True,"yellow")
+    screen.blit(text1,(WIDTH//2-text1.get_width()/2,HEIGHT//2-text1.get_height()/2))
+    pygame.display.update()
 def ylwmove(keys_pressed,yellow):
     if keys_pressed[pygame.K_a] and yellow.x-vel>0: 
         yellow.x-=vel 
@@ -79,8 +100,26 @@ def redmove(keys_pressed,red):
     if keys_pressed[pygame.K_DOWN] and red.y+sh<HEIGHT:
         red.y+=vel
     
-def handlebulllets():
-    pass
+def handlebullets(yellowbullets,red,redbullets,yellow):
+    for bullet in yellowbullets:
+        bullet.x+=bullet_vel
+        if red.colliderect(bullet):
+            pygame.event.post(pygame.event.Event(redhit))
+            yellowbullets.remove(bullet)
+        elif bullet.x>WIDTH:
+            yellowbullets.remove(bullet)
+
+    for bullet in redbullets:
+        bullet.x-=bullet_vel
+        if yellow.colliderect(bullet):
+            pygame.event.post(pygame.event.Event(yellowhit))
+            redbullets.remove(bullet)
+        elif bullet.x<0:
+            redbullets.remove(bullet)
+
+
+            
+
 
 if __name__=="__main__":
     main()
