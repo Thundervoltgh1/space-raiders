@@ -74,11 +74,13 @@ def main():
         redmove(keys_pressed,red)
         draw(red,yellow,redhealth,yellowhealth,yellowbullets,redbullets)
         handlebullets(yellowbullets,red,redbullets,yellow)
+    main()
 
 def draw_winner(text):
     text1=winner.render(text,True,"yellow")
     screen.blit(text1,(WIDTH//2-text1.get_width()/2,HEIGHT//2-text1.get_height()/2))
     pygame.display.update()
+    pygame.time.delay(5000)
 def ylwmove(keys_pressed,yellow):
     if keys_pressed[pygame.K_a] and yellow.x-vel>0: 
         yellow.x-=vel 
